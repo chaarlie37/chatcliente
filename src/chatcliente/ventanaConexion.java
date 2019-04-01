@@ -190,7 +190,8 @@ public class ventanaConexion extends javax.swing.JFrame {
                 ventanaChat.chat.EstablecerConexion(ip_servidor.getText(), puerto);
             }catch(UnknownHostException e){
             }catch(IOException e){
-            }catch(AWTException e){}
+            }catch(AWTException e){
+            }catch(ClassNotFoundException e){}
         }
         ventanaChat.setVisible(true);
         this.setVisible(false);

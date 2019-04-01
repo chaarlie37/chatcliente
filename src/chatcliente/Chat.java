@@ -10,6 +10,8 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -20,7 +22,7 @@ import java.util.ArrayList;
  */
 public class Chat {
     
-    public Chat(String ip, int port, VentanaChat ventana) throws UnknownHostException, IOException, AWTException{
+    public Chat(String ip, int port, VentanaChat ventana) throws UnknownHostException, IOException, AWTException, ClassNotFoundException{
         this.ventana = ventana;
         EstablecerConexion(ip, port);
     }
@@ -35,31 +37,41 @@ public class Chat {
     private VentanaChat ventana;
     public Notification notificacion = new Notification();
     
-    public void EstablecerConexion(String ip, int port) throws UnknownHostException, IOException, AWTException{       
+    private ObjectOutputStream objectStreamToServer;
+    private ObjectInputStream objectInputStream;
+    
+    public void EstablecerConexion(String ip, int port) throws UnknownHostException, IOException, AWTException, ClassNotFoundException{       
         socket = new Socket(ip, port);
-        streamToServer = new DataOutputStream(socket.getOutputStream());
-        streamFromServer = new InputStreamReader(socket.getInputStream());
-        bufferedReader = new BufferedReader(streamFromServer);
+        //streamToServer = new DataOutputStream(socket.getOutputStream());
+        //streamFromServer = new InputStreamReader(socket.getInputStream());
+        
+        objectStreamToServer = new ObjectOutputStream(socket.getOutputStream());
+        objectInputStream = new ObjectInputStream(socket.getInputStream());
+        
+        //bufferedReader = new BufferedReader(streamFromServer);
         ventana.ActualizarConversacion("Estableciendo conexión con " + ip +"...");
         EnviarMensaje("confirm");
-        String mensajeRecibido = bufferedReader.readLine();
+        String mensajeRecibido = DecodificarLista((ArrayList < Integer >)objectInputStream.readObject());
         if(mensajeRecibido.equals("confirm")){
             notificacion.displayTray("Conexión establecida", socket.getInetAddress().toString());
             ventana.conectado = true;
             ventana.ActualizarConversacion("Conectado correctamente.");
         }
+        
     }
     
-    public void EnviarMensaje(String msg) throws IOException{
-        streamToServer.writeBytes(msg + '\n');
+    public void EnviarMensaje(String msg) throws IOException{  
+        //streamToServer.writeBytes(msg + '\n');
+
         ArrayList<Integer> list = CodificarString(msg);
-        System.out.println(DecodificarLista(list));
+        objectStreamToServer.writeObject(list);
     }
     
     public void Escuchar(){
         try {
             String mensajeRecibido;
-            mensajeRecibido = bufferedReader.readLine();
+            //mensajeRecibido = bufferedReader.readLine();
+            mensajeRecibido = DecodificarLista((ArrayList< Integer>) objectInputStream.readObject());
             if ((!mensajeRecibido.equals(""))) {
                 ventana.EscribirMensajeDelServer(mensajeRecibido);
                 if(ventana.minimizado){
@@ -68,7 +80,8 @@ public class Chat {
                 }
             }
         } catch (IOException e) {
-        } catch(AWTException e){}
+        } catch(AWTException e){
+        } catch(ClassNotFoundException e){}
 
     }
     

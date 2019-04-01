@@ -54,7 +54,7 @@ public class VentanaChat extends javax.swing.JFrame {
             chat = new Chat(ip_server, puerto, this);
         } catch (UnknownHostException e) {
         } catch (IOException | AWTException e) {
-        }
+        } catch (ClassNotFoundException e){}
         hilo.start();
     }
 
@@ -162,7 +162,8 @@ public class VentanaChat extends javax.swing.JFrame {
             }
         }catch (UnknownHostException e) {
         }catch (IOException e) {
-        }catch(AWTException e){}      
+        }catch(AWTException e){
+        }catch(ClassNotFoundException e){}      
     }//GEN-LAST:event_bCerrarConexionActionPerformed
 
     private void bEnviarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bEnviarActionPerformed
